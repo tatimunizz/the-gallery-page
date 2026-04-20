@@ -6,13 +6,21 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import java.net.URLEncoder;
+
 
 @Component
 public class Web {
@@ -295,5 +303,79 @@ public class Web {
         "https://storage.ghost.io/c/80/1d/801d5d13-5875-4136-9bfc-1e2fe01b2bff/content/images/size/w600/2026/03/Drawn-from-Nature-Blog--Twitter-.jpg"));
     return fallback;
   }
+
+// ----------------- NEW: Spell Checker Integration -----------------
+
+    /**
+     * Checks spelling of a word and returns correctness, suggestions, and meanings.
+     * Uses free DictionaryAPI.dev for definitions and Datamuse for suggestions.
+     */
+        private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public Map<String, Object> checkSpelling(String word) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("word", word);
+
+        // 1. Try dictionary API for definitions
+        try {
+            String dictUrl = "https://api.dictionaryapi.dev/api/v2/entries/en/" + word.toLowerCase();
+            String json = Jsoup.connect(dictUrl)
+                    .ignoreContentType(true)
+                    .userAgent(USER_AGENT)
+                    .timeout(8000)
+                    .execute()
+                    .body();
+
+            JsonNode root = objectMapper.readTree(json);
+            if (root.isArray() && root.size() > 0) {
+                result.put("correct", true);
+                List<Map<String, Object>> meaningsList = new ArrayList<>();
+                JsonNode meanings = root.get(0).path("meanings");
+                for (JsonNode meaning : meanings) {
+                    Map<String, Object> meaningMap = new HashMap<>();
+                    meaningMap.put("partOfSpeech", meaning.path("partOfSpeech").stringValue());
+                    List<Map<String, String>> definitionsList = new ArrayList<>();
+                    JsonNode definitions = meaning.path("definitions");
+                    for (JsonNode def : definitions) {
+                        Map<String, String> defMap = new HashMap<>();
+                        defMap.put("definition", def.path("definition").stringValue());
+                        if (def.has("example")) {
+                            defMap.put("example", def.path("example").stringValue());
+                        }
+                        definitionsList.add(defMap);
+                    }
+                    meaningMap.put("definitions", definitionsList);
+                    meaningsList.add(meaningMap);
+                }
+                result.put("meanings", meaningsList);
+                return result;
+            }
+        } catch (IOException e) {
+            // Not found – continue to suggestions
+        }
+
+        // 2. Word incorrect – get suggestions from Datamuse
+        result.put("correct", false);
+        try {
+            String sugUrl = "https://api.datamuse.com/sug?s=" + URLEncoder.encode(word, StandardCharsets.UTF_8);
+            String sugJson = Jsoup.connect(sugUrl)
+                    .ignoreContentType(true)
+                    .userAgent(USER_AGENT)
+                    .timeout(8000)
+                    .execute()
+                    .body();
+
+            JsonNode sugRoot = objectMapper.readTree(sugJson);
+            List<String> suggestions = new ArrayList<>();
+            for (JsonNode node : sugRoot) {
+                suggestions.add(node.path("word").stringValue());
+            }
+            result.put("suggestions", suggestions);
+        } catch (IOException ex) {
+            result.put("suggestions", java.util.Arrays.asList("example", "sample", "test"));
+        }
+
+        return result;
+    }
 
 }
