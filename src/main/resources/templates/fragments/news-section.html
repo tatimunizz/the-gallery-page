@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <section th:fragment="news" class="mb-16 opacity-0 animate-[fadeInUp_0.6s_ease-out_0.4s_forwards]" style="animation: fadeInUp 0.6s ease-out 0.4s forwards;">
+        <div class="flex items-baseline gap-3 mb-6">
+            <h2 class="text-4xl border-b-2 border-[#8B7355] pb-1 font-serif-display font-semibold">From the Web</h2>
+            <span class="text-sm opacity-40">Latest Art News</span>
+        </div>
+        <div id="newsContainer" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <p class="col-span-full text-center opacity-60">Loading news...</p>
+        </div>
+    </section>
+</body>
+</html>

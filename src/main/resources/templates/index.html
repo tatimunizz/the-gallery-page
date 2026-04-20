@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Gallery</title>
+    
+    <!-- Fontes Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Estilos customizados -->
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+</head>
+<body class="relative font-sans-ui">
+    <!-- Padrão de fundo fixo -->
+    <div class="fixed inset-0 bg-pattern"></div>
+    
+    <!-- Conteúdo principal -->
+    <div class="relative z-10">
+        <!-- Header -->
+        <div th:replace="~{fragments/header :: header}"></div>
+
+        <!-- Main -->
+        <main class="container mx-auto px-6 py-12">
+            <!-- Comentário Contextual -->
+            <div th:replace="~{fragments/contextual-comment :: comment}"></div>
+
+            <!-- Citação do Dia -->
+            <div th:replace="~{fragments/quote-section :: quote}"></div>
+
+            <!-- Notícias -->
+            <div th:replace="~{fragments/news-section :: news}"></div>
+
+            <!-- Galeria de Imagens -->
+            <div th:replace="~{fragments/image-gallery :: gallery}"></div>
+
+            <!-- Player de Som -->
+            <div th:replace="~{fragments/sound-player :: soundPlayer}"></div>
+
+            <!-- Spell Checker -->
+            <div th:replace="~{fragments/spell-checker :: spellChecker}"></div>
+
+            <!-- Botão Refresh -->
+            <div class="text-center opacity-0 animate-[fadeIn_0.6s_ease-out_1s_forwards]" style="animation: fadeIn 0.6s ease-out 1s forwards;">
+                <button id="refreshBtn" class="px-8 py-4 bg-[#8B7355] text-[#F5F1ED] hover:bg-[#5C4033] transition-colors inline-flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+                    Refresh Content
+                </button>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <div th:replace="~{fragments/footer :: footer}"></div>
+    </div>
+
+    <!-- Modal para zoom das imagens -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <img id="modalImage" src="" alt="">
+    </div>
+
+    <!-- Scripts -->
+    <script th:src="@{/js/audio-player.js}" defer></script>
+    <script th:src="@{/js/modal.js}" defer></script>
+    <script th:src="@{/js/spell-checker.js}" defer></script>
+    <script th:src="@{/js/quote-loader.js}" defer></script>
+    <script th:src="@{/js/news-loader.js}" defer></script>
+    <script th:src="@{/js/image-loader.js}" defer></script>
+    <!-- Script inline para o botão refresh (mock) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('refreshBtn').addEventListener('click', () => {
+                alert('Refresh: em breve os dados virão do backend!');
+            });
+        });
+    </script>
+    
+</body>
+</html>

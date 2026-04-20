@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <section th:fragment="quote" class="mb-16 opacity-0 animate-[fadeInUp_0.6s_ease-out_0.3s_forwards]" style="animation: fadeInUp 0.6s ease-out 0.3s forwards;">
+        <div class="flex items-baseline gap-3 mb-6">
+            <h2 class="text-4xl border-b-2 border-[#8B7355] pb-1 font-serif-display font-semibold">Words of Wisdom</h2>
+            <span class="text-sm opacity-40">Random Phrase Generator</span>
+        </div>
+        <div class="bg-white/40 backdrop-blur-sm border-l-4 border-[#8B7355] p-8">
+            <blockquote id="quoteContent" class="text-3xl md:text-4xl mb-4 leading-relaxed font-serif-body italic">"Loading..."</blockquote>
+            <p id="quoteAuthor" class="text-right text-xl opacity-70 font-serif-display">— </p>
+        </div>
+    </section>
+</body>
+</html>

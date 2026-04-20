@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <section th:fragment="gallery" class="mb-16 opacity-0 animate-[fadeInUp_0.6s_ease-out_0.6s_forwards]" style="animation: fadeInUp 0.6s ease-out 0.6s forwards;">
+        <div class="flex items-baseline gap-3 mb-6">
+            <h2 class="text-4xl border-b-2 border-[#8B7355] pb-1 font-serif-display font-semibold">Visual Inspiration</h2>
+            <span class="text-sm opacity-40">From Unsplash Blog</span>
+        </div>
+        <div id="galleryContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <p class="col-span-full text-center opacity-60">Loading images...</p>
+        </div>
+    </section>
+</body>
+</html>

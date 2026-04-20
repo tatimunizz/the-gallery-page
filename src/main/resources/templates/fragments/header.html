@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <header th:fragment="header" class="border-b-4 border-[#8B7355] bg-[#2C1810] text-[#F5F1ED]">
+        <div class="container mx-auto px-6 py-8">
+            <div class="opacity-0 animate-[fadeIn_0.6s_ease-out_forwards]" style="animation: fadeIn 0.6s ease-out forwards;">
+                <h1 class="text-6xl md:text-7xl mb-2 italic font-serif-display font-semibold" th:text="${pageTitle}">The Gallery</h1>
+                <p class="text-lg opacity-80 max-w-2xl" th:text="${pageSubtitle}">A curated collection of art, wisdom, and creative inspiration from across the web</p>
+            </div>
+        </div>
+    </header>
+</body>
+</html>

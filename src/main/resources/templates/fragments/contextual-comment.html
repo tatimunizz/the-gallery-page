@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="comment" class="mb-12 p-6 bg-[#8B7355] text-[#F5F1ED] relative overflow-hidden rounded-sm shadow-lg opacity-0 animate-[slideIn_0.6s_ease-out_0.2s_forwards]" style="animation: slideIn 0.6s ease-out 0.2s forwards;">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-[#5C4033] rounded-full -translate-y-1/2 translate-x-1/2 opacity-20"></div>
+        <p class="text-2xl md:text-3xl italic relative z-10 font-serif-body" th:text="${comment}">"Art has the power to transform our daily lives."</p>
+    </div>
+</body>
+</html>

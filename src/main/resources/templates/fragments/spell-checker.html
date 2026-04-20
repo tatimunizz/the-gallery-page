@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <section th:fragment="spellChecker" class="mb-16 opacity-0 animate-[fadeInUp_0.6s_ease-out_0.8s_forwards]" style="animation: fadeInUp 0.6s ease-out 0.8s forwards;">
+        <div class="flex items-baseline gap-3 mb-6">
+            <h2 class="text-4xl border-b-2 border-[#8B7355] pb-1 font-serif-display font-semibold">Word Checker</h2>
+            <span class="text-sm opacity-40">Dictionary Integration</span>
+        </div>
+        <div class="w-full max-w-2xl mx-auto">
+            <form id="spellCheckForm" class="relative">
+                <div class="relative">
+                    <input type="text" id="wordInput" placeholder="Enter a word to check spelling..." class="w-full px-6 py-4 pr-14 bg-white/5 border-2 border-[#8B7355]/20 rounded-none focus:border-[#8B7355]/40 focus:outline-none transition-colors backdrop-blur-sm">
+                    <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </button>
+                </div>
+            </form>
+            <div id="spellResult" class="mt-6 p-6 bg-white/5 border border-[#8B7355]/20 backdrop-blur-sm hidden"></div>
+            <p class="text-xs opacity-40 mt-2 text-center">(Spell checking will be integrated with backend in the next step)</p>
+        </div>
+    </section>
+</body>
+</html>
