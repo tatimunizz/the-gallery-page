@@ -6,7 +6,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const muteBtn = document.getElementById('muteBtn');
     const volumeIcon = document.getElementById('volumeIcon');
     const muteIcon = document.getElementById('muteIcon');
-
+    const volumeSlider = document.getElementById('volumeSlider');
+    const clickSound = new Audio('/sounds/notification.mp3');
+    
     if (!audio) return;
 
     playBtn.addEventListener('click', () => {
@@ -31,4 +33,22 @@ document.addEventListener('DOMContentLoaded', function() {
             muteIcon.classList.add('hidden');
         }
     });
+
+
+    // Optional: lower volume so it's not intrusive
+    clickSound.volume = 0.3;
+
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('a')) {
+            clickSound.cloneNode().play().catch(() => {});
+        }
+    }, true); // ← The third parameter `true` enables capturing);
+
+
+    //volume slider for user adjustment
+if (volumeSlider) {
+    volumeSlider.addEventListener('input', (e) => {
+        audio.volume = e.target.value;
+    });
+}
 });
