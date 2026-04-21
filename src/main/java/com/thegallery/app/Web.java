@@ -174,29 +174,24 @@ public class Web {
 
   /**
    * Scrapes the latest posts with high-quality images from the Unsplash blog.
-   * First collects post links and titles from the main blog page, then visits
-   * each post
-   * to extract the full-resolution image directly from the main content figure.
    */
   public List<Map<String, String>> scrapeImages() {
     String targetUrl = "https://unsplash.com/blog/";
     List<Map<String, String>> images = new ArrayList<>();
 
-    // 1. Respect robots.txt (explicitly allows /blog)
     if (!isAllowedByRobots(targetUrl, USER_AGENT)) {
       System.err.println("Access disallowed by robots.txt for: " + targetUrl);
       return getFallbackImages();
     }
 
     try {
-      TimeUnit.MILLISECONDS.sleep(500); // Rate limiting
+      TimeUnit.MILLISECONDS.sleep(500);
 
       Document doc = Jsoup.connect(targetUrl)
           .userAgent(USER_AGENT)
           .timeout(10000)
           .get();
 
-      // 2. Collect up to 6 post links and titles from the main page
       Elements postCards = doc.select(".post-card.js-post-entry");
       List<PostInfo> postInfos = new ArrayList<>();
 
@@ -211,13 +206,11 @@ public class Web {
         String link = linkElement != null ? linkElement.attr("href") : "";
 
         if (!title.isEmpty() && !link.isEmpty()) {
-          // Ensure absolute URL
           String fullLink = link.startsWith("http") ? link : "https://unsplash.com" + link;
           postInfos.add(new PostInfo(title, fullLink));
         }
       }
 
-      // 3. Visit each post page to extract the high-resolution image
       for (PostInfo info : postInfos) {
         String imageUrl = fetchHighResImageFromPost(info.link);
 
@@ -228,7 +221,6 @@ public class Web {
               "imageUrl", imageUrl));
         }
 
-        // Be respectful: delay between post requests
         TimeUnit.MILLISECONDS.sleep(800);
       }
 
@@ -244,9 +236,7 @@ public class Web {
   }
 
   /**
-   * Fetches a single post page and extracts the main image URL from the content
-   * figure.
-   * Based on the actual HTML structure provided by the user.
+   * Fetches a single post page and extracts the main image URL
    */
   private String fetchHighResImageFromPost(String postUrl) {
     try {
@@ -255,25 +245,23 @@ public class Web {
           .timeout(10000)
           .get();
 
-      // The main high-res image is inside a <figure> with classes "kg-card
-      // kg-image-card kg-width-full"
       Element figure = doc.selectFirst("figure.kg-card.kg-image-card");
       if (figure != null) {
         Element img = figure.selectFirst("img");
         if (img != null) {
           String src = img.attr("src");
           if (!src.isEmpty()) {
-            return src; // This is the high-resolution original
+            return src;
           }
         }
       }
     } catch (IOException e) {
       System.err.println("Failed to fetch post: " + postUrl + " - " + e.getMessage());
     }
-    return ""; // Return empty if not found
+    return "";
   }
 
-  // Simple helper class to hold post information before fetching the image
+  // helper class to hold post information before fetching the image
   private static class PostInfo {
     final String title;
     final String link;
@@ -304,19 +292,17 @@ public class Web {
     return fallback;
   }
 
-// ----------------- NEW: Spell Checker Integration -----------------
-
     /**
-     * Checks spelling of a word and returns correctness, suggestions, and meanings.
-     * Uses free DictionaryAPI.dev for definitions and Datamuse for suggestions.
+     * Spell Checker Integration
+     * Uses free DictionaryAPI.dev
+     * Datamuse for suggestions
      */
-        private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public Map<String, Object> checkSpelling(String word) {
         Map<String, Object> result = new HashMap<>();
         result.put("word", word);
 
-        // 1. Try dictionary API for definitions
         try {
             String dictUrl = "https://api.dictionaryapi.dev/api/v2/entries/en/" + word.toLowerCase();
             String json = Jsoup.connect(dictUrl)
@@ -351,10 +337,8 @@ public class Web {
                 return result;
             }
         } catch (IOException e) {
-            // Not found – continue to suggestions
         }
 
-        // 2. Word incorrect – get suggestions from Datamuse
         result.put("correct", false);
         try {
             String sugUrl = "https://api.datamuse.com/sug?s=" + URLEncoder.encode(word, StandardCharsets.UTF_8);

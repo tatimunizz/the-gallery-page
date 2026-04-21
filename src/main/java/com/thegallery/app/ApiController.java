@@ -33,7 +33,6 @@ public class ApiController {
         return web.scrapeImages();
     }
 
-    // ✅ This method is required for spell checker
     @GetMapping("/spellcheck")
     public Map<String, Object> spellCheck(@RequestParam String word) {
         return web.checkSpelling(word);
