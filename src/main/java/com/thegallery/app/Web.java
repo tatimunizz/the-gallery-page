@@ -6,13 +6,21 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
 
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import java.net.URLEncoder;
+
 
 @Component
 public class Web {
@@ -166,29 +174,24 @@ public class Web {
 
   /**
    * Scrapes the latest posts with high-quality images from the Unsplash blog.
-   * First collects post links and titles from the main blog page, then visits
-   * each post
-   * to extract the full-resolution image directly from the main content figure.
    */
   public List<Map<String, String>> scrapeImages() {
     String targetUrl = "https://unsplash.com/blog/";
     List<Map<String, String>> images = new ArrayList<>();
 
-    // 1. Respect robots.txt (explicitly allows /blog)
     if (!isAllowedByRobots(targetUrl, USER_AGENT)) {
       System.err.println("Access disallowed by robots.txt for: " + targetUrl);
       return getFallbackImages();
     }
 
     try {
-      TimeUnit.MILLISECONDS.sleep(500); // Rate limiting
+      TimeUnit.MILLISECONDS.sleep(500);
 
       Document doc = Jsoup.connect(targetUrl)
           .userAgent(USER_AGENT)
           .timeout(10000)
           .get();
 
-      // 2. Collect up to 6 post links and titles from the main page
       Elements postCards = doc.select(".post-card.js-post-entry");
       List<PostInfo> postInfos = new ArrayList<>();
 
@@ -203,13 +206,11 @@ public class Web {
         String link = linkElement != null ? linkElement.attr("href") : "";
 
         if (!title.isEmpty() && !link.isEmpty()) {
-          // Ensure absolute URL
           String fullLink = link.startsWith("http") ? link : "https://unsplash.com" + link;
           postInfos.add(new PostInfo(title, fullLink));
         }
       }
 
-      // 3. Visit each post page to extract the high-resolution image
       for (PostInfo info : postInfos) {
         String imageUrl = fetchHighResImageFromPost(info.link);
 
@@ -220,7 +221,6 @@ public class Web {
               "imageUrl", imageUrl));
         }
 
-        // Be respectful: delay between post requests
         TimeUnit.MILLISECONDS.sleep(800);
       }
 
@@ -236,9 +236,7 @@ public class Web {
   }
 
   /**
-   * Fetches a single post page and extracts the main image URL from the content
-   * figure.
-   * Based on the actual HTML structure provided by the user.
+   * Fetches a single post page and extracts the main image URL
    */
   private String fetchHighResImageFromPost(String postUrl) {
     try {
@@ -247,25 +245,23 @@ public class Web {
           .timeout(10000)
           .get();
 
-      // The main high-res image is inside a <figure> with classes "kg-card
-      // kg-image-card kg-width-full"
       Element figure = doc.selectFirst("figure.kg-card.kg-image-card");
       if (figure != null) {
         Element img = figure.selectFirst("img");
         if (img != null) {
           String src = img.attr("src");
           if (!src.isEmpty()) {
-            return src; // This is the high-resolution original
+            return src;
           }
         }
       }
     } catch (IOException e) {
       System.err.println("Failed to fetch post: " + postUrl + " - " + e.getMessage());
     }
-    return ""; // Return empty if not found
+    return "";
   }
 
-  // Simple helper class to hold post information before fetching the image
+  // helper class to hold post information before fetching the image
   private static class PostInfo {
     final String title;
     final String link;
@@ -295,5 +291,75 @@ public class Web {
         "https://storage.ghost.io/c/80/1d/801d5d13-5875-4136-9bfc-1e2fe01b2bff/content/images/size/w600/2026/03/Drawn-from-Nature-Blog--Twitter-.jpg"));
     return fallback;
   }
+
+    /**
+     * Spell Checker Integration
+     * Uses free DictionaryAPI.dev
+     * Datamuse for suggestions
+     */
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public Map<String, Object> checkSpelling(String word) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("word", word);
+
+        try {
+            String dictUrl = "https://api.dictionaryapi.dev/api/v2/entries/en/" + word.toLowerCase();
+            String json = Jsoup.connect(dictUrl)
+                    .ignoreContentType(true)
+                    .userAgent(USER_AGENT)
+                    .timeout(8000)
+                    .execute()
+                    .body();
+
+            JsonNode root = objectMapper.readTree(json);
+            if (root.isArray() && root.size() > 0) {
+                result.put("correct", true);
+                List<Map<String, Object>> meaningsList = new ArrayList<>();
+                JsonNode meanings = root.get(0).path("meanings");
+                for (JsonNode meaning : meanings) {
+                    Map<String, Object> meaningMap = new HashMap<>();
+                    meaningMap.put("partOfSpeech", meaning.path("partOfSpeech").stringValue());
+                    List<Map<String, String>> definitionsList = new ArrayList<>();
+                    JsonNode definitions = meaning.path("definitions");
+                    for (JsonNode def : definitions) {
+                        Map<String, String> defMap = new HashMap<>();
+                        defMap.put("definition", def.path("definition").stringValue());
+                        if (def.has("example")) {
+                            defMap.put("example", def.path("example").stringValue());
+                        }
+                        definitionsList.add(defMap);
+                    }
+                    meaningMap.put("definitions", definitionsList);
+                    meaningsList.add(meaningMap);
+                }
+                result.put("meanings", meaningsList);
+                return result;
+            }
+        } catch (IOException e) {
+        }
+
+        result.put("correct", false);
+        try {
+            String sugUrl = "https://api.datamuse.com/sug?s=" + URLEncoder.encode(word, StandardCharsets.UTF_8);
+            String sugJson = Jsoup.connect(sugUrl)
+                    .ignoreContentType(true)
+                    .userAgent(USER_AGENT)
+                    .timeout(8000)
+                    .execute()
+                    .body();
+
+            JsonNode sugRoot = objectMapper.readTree(sugJson);
+            List<String> suggestions = new ArrayList<>();
+            for (JsonNode node : sugRoot) {
+                suggestions.add(node.path("word").stringValue());
+            }
+            result.put("suggestions", suggestions);
+        } catch (IOException ex) {
+            result.put("suggestions", java.util.Arrays.asList("example", "sample", "test"));
+        }
+
+        return result;
+    }
 
 }

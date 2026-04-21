@@ -1,3 +1,4 @@
+<!-- templates/fragments/spell-checker.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
@@ -9,14 +10,20 @@
         <div class="w-full max-w-2xl mx-auto">
             <form id="spellCheckForm" class="relative">
                 <div class="relative">
-                    <input type="text" id="wordInput" placeholder="Enter a word to check spelling..." class="w-full px-6 py-4 pr-14 bg-white/5 border-2 border-[#8B7355]/20 rounded-none focus:border-[#8B7355]/40 focus:outline-none transition-colors backdrop-blur-sm">
-                    <button type="submit" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded transition-colors">
+                    <input type="text" id="wordInput" placeholder="Enter a word to check spelling..." 
+                           class="w-full px-6 py-4 pr-14 bg-white/5 border-2 border-[#8B7355]/20 rounded-none focus:border-[#8B7355]/40 focus:outline-none transition-colors backdrop-blur-sm">
+                    <button type="submit" id="spellCheckBtn" 
+                            class="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded transition-colors disabled:opacity-50">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     </button>
                 </div>
             </form>
+            
+            <div id="spellLoading" class="mt-6 text-center hidden">
+                <p class="text-sm opacity-60">Checking dictionary...</p>
+            </div>
+            
             <div id="spellResult" class="mt-6 p-6 bg-white/5 border border-[#8B7355]/20 backdrop-blur-sm hidden"></div>
-            <p class="text-xs opacity-40 mt-2 text-center">(Spell checking will be integrated with backend in the next step)</p>
         </div>
     </section>
 </body>

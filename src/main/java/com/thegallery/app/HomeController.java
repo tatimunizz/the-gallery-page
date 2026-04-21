@@ -14,7 +14,6 @@ public class HomeController {
         model.addAttribute("comment", "Art has the power to transform our daily lives.");
         model.addAttribute("quoteContent", "Inspiration exists, but it has to find you working.");
         model.addAttribute("quoteAuthor", "Pablo Picasso");
-        // Os demais dados mockados estão hardcoded nos fragmentos por enquanto
         return "index";
     }
 }
