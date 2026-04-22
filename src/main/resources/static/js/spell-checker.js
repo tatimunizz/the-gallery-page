@@ -17,9 +17,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const word = wordInput.value.trim();
         if (!word) return;
 
-        if (loadingDiv) loadingDiv.classList.remove('hidden');
-        resultDiv.classList.add('hidden');
-        spellCheckBtn.disabled = true;
+        if (window.loaderStart) window.loaderStart();
+
+        // if (loadingDiv) loadingDiv.classList.remove('hidden');
+        // resultDiv.classList.add('hidden');
+        // spellCheckBtn.disabled = true;
 
         try {
             const response = await fetch(`/api/spellcheck?word=${encodeURIComponent(word)}`);
@@ -32,8 +34,9 @@ document.addEventListener('DOMContentLoaded', function () {
             resultDiv.innerHTML = `<p class="text-sm text-red-400">Error checking word. Please try again.</p>`;
             resultDiv.classList.remove('hidden');
         } finally {
-            if (loadingDiv) loadingDiv.classList.add('hidden');
-            spellCheckBtn.disabled = false;
+            // if (loadingDiv) loadingDiv.classList.add('hidden');
+            // spellCheckBtn.disabled = false;
+            if (window.loaderFinish) window.loaderFinish();
         }
     });
 
