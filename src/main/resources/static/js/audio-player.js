@@ -11,6 +11,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!audio) return;
 
+    if (volumeSlider) {
+        audio.volume = volumeSlider.value;
+    }
+    
     playBtn.addEventListener("click", () => {
         if (audio.paused) {
             audio.play();

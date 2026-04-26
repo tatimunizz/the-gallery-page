@@ -337,6 +337,7 @@ public class Web {
                 return result;
             }
         } catch (IOException e) {
+          System.err.println("DictionaryAPI error: " + e.getMessage());
         }
 
         result.put("correct", false);
@@ -361,5 +362,64 @@ public class Web {
 
         return result;
     }
+
+
+
+    /**
+ * Generates an AI-powered contextual comment based on the current page content.
+ * Uses the free, open-source Pollinations.AI text generation API.
+ * No API key or signup is required.
+ */
+public String generateAIComment() {
+    // 1. Collect current data from all scrapers
+    Map<String, String> quote = scrapeQuote();
+    List<Map<String, String>> news = scrapeArtsNews();
+    List<Map<String, String>> images = scrapeImages();
+
+    // 2. Build the prompt for the AI
+    StringBuilder promptBuilder = new StringBuilder();
+    promptBuilder.append("You are a curator at an art gallery. ");
+    promptBuilder.append("Based on the real-time content below, generate ONE short, truthful, ");
+    promptBuilder.append("and inspiring comment about today's collection. ");
+    promptBuilder.append("Max 50 words. Return only the comment text, no quotes around it.\n\n");
+    promptBuilder.append("--- Today's Quote ---\n");
+    promptBuilder.append("\"").append(quote.get("quote")).append("\" — ").append(quote.get("author")).append("\n\n");
+    promptBuilder.append("--- Latest Art News ---\n");
+    for (Map<String, String> article : news) {
+        promptBuilder.append("• ").append(article.get("title")).append("\n");
+    }
+    promptBuilder.append("\n--- Featured Images ---\n");
+    for (Map<String, String> img : images) {
+        promptBuilder.append("• ").append(img.get("title")).append("\n");
+    }
+
+    return callPollinationsAPI(promptBuilder.toString());
+}
+
+/**
+ * Calls the free Pollinations.AI text generation API.
+ */
+private String callPollinationsAPI(String prompt) {
+    try {
+        // 3. Encode the prompt for URL and build the full GET request
+        String encodedPrompt = URLEncoder.encode(prompt, StandardCharsets.UTF_8);
+        String url = "https://text.pollinations.ai/" + encodedPrompt + "?model=openai&temperature=0.8";
+
+        // 4. Call the API
+        Document response = Jsoup.connect(url)
+                .ignoreContentType(true)
+                .userAgent(USER_AGENT)
+                .timeout(15000)
+                .get();
+
+        // 5. The API returns the comment as plain text directly in the body
+        String comment = response.text();
+        return comment.replace("“", "").replace("”", "").trim();
+
+    } catch (IOException e) {
+        System.err.println("Pollinations API call failed: " + e.getMessage());
+        return "Art has the power to transform our daily lives.";
+    }
+}
 
 }

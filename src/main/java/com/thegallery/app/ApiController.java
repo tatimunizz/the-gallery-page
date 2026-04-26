@@ -37,4 +37,10 @@ public class ApiController {
     public Map<String, Object> spellCheck(@RequestParam String word) {
         return web.checkSpelling(word);
     }
+
+    @GetMapping("/comment")
+    public Map<String, String> getComment() {
+        String comment = web.generateAIComment();
+        return Map.of("comment", comment);
+    }
 }

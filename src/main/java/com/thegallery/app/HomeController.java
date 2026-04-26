@@ -11,9 +11,6 @@ public class HomeController {
     public String home(Model model) {
         model.addAttribute("pageTitle", "The Gallery");
         model.addAttribute("pageSubtitle", "A curated collection of art, wisdom, and creative inspiration from across the web");
-        model.addAttribute("comment", "Art has the power to transform our daily lives.");
-        model.addAttribute("quoteContent", "Inspiration exists, but it has to find you working.");
-        model.addAttribute("quoteAuthor", "Pablo Picasso");
         return "index";
     }
 }
