@@ -1,10 +1,9 @@
 // static/js/spell-checker.js
-
 document.addEventListener('DOMContentLoaded', function () {
     const spellForm = document.getElementById('spellCheckForm');
     const wordInput = document.getElementById('wordInput');
     const resultDiv = document.getElementById('spellResult');
-    
+
     if (!spellForm) return;
 
     const checkIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
@@ -15,22 +14,29 @@ document.addEventListener('DOMContentLoaded', function () {
         const word = wordInput.value.trim();
         if (!word) return;
 
-        if (window.loaderStart) window.loaderStart();
+        showLocalSpinner();
 
         try {
             const response = await fetch(`/api/spellcheck?word=${encodeURIComponent(word)}`);
             if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.json();
-
             renderResult(word, data);
         } catch (error) {
             console.error('Spell check error:', error);
             resultDiv.innerHTML = `<p class="text-sm text-red-400">Error checking word. Please try again.</p>`;
             resultDiv.classList.remove('hidden');
-        } finally {
-            if (window.loaderFinish) window.loaderFinish();
         }
     });
+
+    function showLocalSpinner() {
+        resultDiv.innerHTML = `
+        <div class="loading-spinner">
+            <div class="loading-glow"></div>
+            <i class="loading-sparkle ri-sparkling-line"></i>
+        </div>
+    `;
+    resultDiv.classList.remove('hidden');
+    }
 
     function renderResult(word, data) {
         const { correct = false, suggestions = [], meanings = [] } = data;
