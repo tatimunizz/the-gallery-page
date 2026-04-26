@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit;
 
 import java.net.URLEncoder;
 
-
 @Component
 public class Web {
 
@@ -292,91 +291,82 @@ public class Web {
     return fallback;
   }
 
-    /**
-     * Spell Checker Integration
-     * Uses free DictionaryAPI.dev
-     * Datamuse for suggestions
-     */
-    private final ObjectMapper objectMapper = new ObjectMapper();
+  /**
+   * Spell Checker Integration
+   * Uses free DictionaryAPI.dev
+   * Datamuse for suggestions
+   */
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public Map<String, Object> checkSpelling(String word) {
-        Map<String, Object> result = new HashMap<>();
-        result.put("word", word);
+  public Map<String, Object> checkSpelling(String word) {
+    Map<String, Object> result = new HashMap<>();
+    result.put("word", word);
 
-        try {
-            String dictUrl = "https://api.dictionaryapi.dev/api/v2/entries/en/" + word.toLowerCase();
-            String json = Jsoup.connect(dictUrl)
-                    .ignoreContentType(true)
-                    .userAgent(USER_AGENT)
-                    .timeout(8000)
-                    .execute()
-                    .body();
+    try {
+      String dictUrl = "https://api.dictionaryapi.dev/api/v2/entries/en/" + word.toLowerCase();
+      String json = Jsoup.connect(dictUrl)
+          .ignoreContentType(true)
+          .userAgent(USER_AGENT)
+          .timeout(8000)
+          .execute()
+          .body();
 
-            JsonNode root = objectMapper.readTree(json);
-            if (root.isArray() && root.size() > 0) {
-                result.put("correct", true);
-                List<Map<String, Object>> meaningsList = new ArrayList<>();
-                JsonNode meanings = root.get(0).path("meanings");
-                for (JsonNode meaning : meanings) {
-                    Map<String, Object> meaningMap = new HashMap<>();
-                    meaningMap.put("partOfSpeech", meaning.path("partOfSpeech").stringValue());
-                    List<Map<String, String>> definitionsList = new ArrayList<>();
-                    JsonNode definitions = meaning.path("definitions");
-                    for (JsonNode def : definitions) {
-                        Map<String, String> defMap = new HashMap<>();
-                        defMap.put("definition", def.path("definition").stringValue());
-                        if (def.has("example")) {
-                            defMap.put("example", def.path("example").stringValue());
-                        }
-                        definitionsList.add(defMap);
-                    }
-                    meaningMap.put("definitions", definitionsList);
-                    meaningsList.add(meaningMap);
-                }
-                result.put("meanings", meaningsList);
-                return result;
+      JsonNode root = objectMapper.readTree(json);
+      if (root.isArray() && root.size() > 0) {
+        result.put("correct", true);
+        List<Map<String, Object>> meaningsList = new ArrayList<>();
+        JsonNode meanings = root.get(0).path("meanings");
+        for (JsonNode meaning : meanings) {
+          Map<String, Object> meaningMap = new HashMap<>();
+          meaningMap.put("partOfSpeech", meaning.path("partOfSpeech").stringValue());
+          List<Map<String, String>> definitionsList = new ArrayList<>();
+          JsonNode definitions = meaning.path("definitions");
+          for (JsonNode def : definitions) {
+            Map<String, String> defMap = new HashMap<>();
+            defMap.put("definition", def.path("definition").stringValue());
+            if (def.has("example")) {
+              defMap.put("example", def.path("example").stringValue());
             }
-        } catch (IOException e) {
-          System.err.println("DictionaryAPI error: " + e.getMessage());
+            definitionsList.add(defMap);
+          }
+          meaningMap.put("definitions", definitionsList);
+          meaningsList.add(meaningMap);
         }
-
-        result.put("correct", false);
-        try {
-            String sugUrl = "https://api.datamuse.com/sug?s=" + URLEncoder.encode(word, StandardCharsets.UTF_8);
-            String sugJson = Jsoup.connect(sugUrl)
-                    .ignoreContentType(true)
-                    .userAgent(USER_AGENT)
-                    .timeout(8000)
-                    .execute()
-                    .body();
-
-            JsonNode sugRoot = objectMapper.readTree(sugJson);
-            List<String> suggestions = new ArrayList<>();
-            for (JsonNode node : sugRoot) {
-                suggestions.add(node.path("word").stringValue());
-            }
-            result.put("suggestions", suggestions);
-        } catch (IOException ex) {
-            result.put("suggestions", java.util.Arrays.asList("example", "sample", "test"));
-        }
-
+        result.put("meanings", meaningsList);
         return result;
+      }
+    } catch (IOException e) {
+      System.err.println("DictionaryAPI error: " + e.getMessage());
     }
 
+    result.put("correct", false);
+    try {
+      String sugUrl = "https://api.datamuse.com/sug?s=" + URLEncoder.encode(word, StandardCharsets.UTF_8);
+      String sugJson = Jsoup.connect(sugUrl)
+          .ignoreContentType(true)
+          .userAgent(USER_AGENT)
+          .timeout(8000)
+          .execute()
+          .body();
 
+      JsonNode sugRoot = objectMapper.readTree(sugJson);
+      List<String> suggestions = new ArrayList<>();
+      for (JsonNode node : sugRoot) {
+        suggestions.add(node.path("word").stringValue());
+      }
+      result.put("suggestions", suggestions);
+    } catch (IOException ex) {
+      result.put("suggestions", java.util.Arrays.asList("example", "sample", "test"));
+    }
 
-    /**
- * Generates an AI-powered contextual comment based on the current page content.
- * Uses the free, open-source Pollinations.AI text generation API.
- * No API key or signup is required.
- */
-public String generateAIComment() {
-    // 1. Collect current data from all scrapers
+    return result;
+  }
+
+  public String generateAIComment() {
     Map<String, String> quote = scrapeQuote();
     List<Map<String, String>> news = scrapeArtsNews();
     List<Map<String, String>> images = scrapeImages();
 
-    // 2. Build the prompt for the AI
     StringBuilder promptBuilder = new StringBuilder();
     promptBuilder.append("You are a curator at an art gallery. ");
     promptBuilder.append("Based on the real-time content below, generate ONE short, truthful, ");
@@ -386,40 +376,37 @@ public String generateAIComment() {
     promptBuilder.append("\"").append(quote.get("quote")).append("\" — ").append(quote.get("author")).append("\n\n");
     promptBuilder.append("--- Latest Art News ---\n");
     for (Map<String, String> article : news) {
-        promptBuilder.append("• ").append(article.get("title")).append("\n");
+      promptBuilder.append("• ").append(article.get("title")).append("\n");
     }
     promptBuilder.append("\n--- Featured Images ---\n");
     for (Map<String, String> img : images) {
-        promptBuilder.append("• ").append(img.get("title")).append("\n");
+      promptBuilder.append("• ").append(img.get("title")).append("\n");
     }
 
     return callPollinationsAPI(promptBuilder.toString());
-}
+  }
 
-/**
- * Calls the free Pollinations.AI text generation API.
- */
-private String callPollinationsAPI(String prompt) {
+  /**
+   * Calls Pollinations.AI text generation API.
+   */
+  private String callPollinationsAPI(String prompt) {
     try {
-        // 3. Encode the prompt for URL and build the full GET request
-        String encodedPrompt = URLEncoder.encode(prompt, StandardCharsets.UTF_8);
-        String url = "https://text.pollinations.ai/" + encodedPrompt + "?model=openai&temperature=0.8";
+      String encodedPrompt = URLEncoder.encode(prompt, StandardCharsets.UTF_8);
+      String url = "https://text.pollinations.ai/" + encodedPrompt + "?model=openai&temperature=0.8";
 
-        // 4. Call the API
-        Document response = Jsoup.connect(url)
-                .ignoreContentType(true)
-                .userAgent(USER_AGENT)
-                .timeout(15000)
-                .get();
+      Document response = Jsoup.connect(url)
+          .ignoreContentType(true)
+          .userAgent(USER_AGENT)
+          .timeout(15000)
+          .get();
 
-        // 5. The API returns the comment as plain text directly in the body
-        String comment = response.text();
-        return comment.replace("“", "").replace("”", "").trim();
+      String comment = response.text();
+      return comment.replace("“", "").replace("”", "").trim();
 
     } catch (IOException e) {
-        System.err.println("Pollinations API call failed: " + e.getMessage());
-        return "Art has the power to transform our daily lives.";
+      System.err.println("Pollinations API call failed: " + e.getMessage());
+      return "Art has the power to transform our daily lives.";
     }
-}
+  }
 
 }

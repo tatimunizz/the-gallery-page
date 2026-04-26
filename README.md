@@ -4,7 +4,7 @@ A curated web application that aggregates live content from the internet—quote
 
 ## Features
 
-- **Quote of the Day** – Scraped from [quotes.toscrape.com](http://quotes.toscrape.com) with `robots.txt` compliance.
+- **Quote of the Day** – Scraped from [quotes.toscrape.com](http://quotes.toscrape.com).
 - **Art News** – Latest headlines from [Hyperallergic](https://hyperallergic.com) RSS feed.
 - **Visual Inspiration** – High‑resolution images extracted from the [Unsplash Blog](https://unsplash.com/blog/).
 - **Spell Checker** – Backend integration with the Datamuse API and DictionaryAPI.dev.
@@ -65,6 +65,7 @@ All endpoints are prefixed with `/api` and return JSON.
 To create a single, executable JAR file that contains both the backend and the frontend static assets:
 
 .\mvnw clean package      # Windows
+
 ./mvnw clean package      # macOS / Linux
 
 The JAR will be located in the `target/` directory. Run it with:
@@ -80,21 +81,6 @@ A `Dockerfile` is included for containerised deployment. Build and run with:
 docker build -t the-gallery .
 docker run -p 8080:8080 the-gallery
 
-## Project Structure
-
-the-gallery/
-├── src/
-│   ├── main/
-│   │   ├── java/com/thegallery/app/     # Java source files (Web, Controllers)
-│   │   ├── resources/
-│   │   │   ├── static/                  # Frontend assets (CSS, JS, images)
-│   │   │   ├── templates/               # Thymeleaf HTML fragments
-│   │   │   └── application.properties   # Spring Boot configuration
-├── Dockerfile
-├── .gitignore
-├── pom.xml
-└── README.md
-
 ## Responsible Web Scraping
 
 This project follows best practices for ethical scraping:
@@ -107,7 +93,9 @@ This project follows best practices for ethical scraping:
 
 ## License
 
-This project is for educational purposes as part of a university assignment. All aggregated content belongs to their respective owners.
+This project is an academic work for CISC3016 - Multimedia Computing at the University of Macau, developed by Tatiana Muniz Rodriguez and Diogo Barros.
+
+It is for educational purposes only. All aggregated content belongs to their respective owners.
 
 ---
 *Built with ☕ and Spring Boot*
