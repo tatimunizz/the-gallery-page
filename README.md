@@ -7,16 +7,18 @@ A curated web application that aggregates live content from the internet—quote
 - **Quote of the Day** – Scraped from [quotes.toscrape.com](http://quotes.toscrape.com) with `robots.txt` compliance.
 - **Art News** – Latest headlines from [Hyperallergic](https://hyperallergic.com) RSS feed.
 - **Visual Inspiration** – High‑resolution images extracted from the [Unsplash Blog](https://unsplash.com/blog/).
-- **Spell Checker** – Backend integration with the Datamuse API.
-- **Contextual Comments** – Random, theme‑aware commentary generated from scraped tags.
+- **Spell Checker** – Backend integration with the Datamuse API and DictionaryAPI.dev.
+- **AI Contextual Comment** – A dynamic, AI‑generated comment based on the current page content, powered by [Pollinations.AI](https://pollinations.ai/).
 - **Image Zoom** – Hover scaling and click‑to‑open modal for full‑screen viewing.
 - **Ambient Sound** – Custom audio player for an immersive experience.
+- **Responsive Refresh** – Each section can refresh independently with a local spinner; a global overlay is shown only during initial page load.
 
 ## Technologies
 
 - **Backend:** Java 17, Spring Boot 3.2, Maven, Jsoup
 - **Frontend:** HTML, CSS, JavaScript (served statically from `src/main/resources/static`)
 - **Template Engine:** Thymeleaf (for fragment modularisation)
+- **APIs:** Datamuse, DictionaryAPI.dev, Pollinations.AI
 
 ## Prerequisites
 
@@ -28,7 +30,7 @@ A curated web application that aggregates live content from the internet—quote
 ### 1. Clone the Repository
 
 git clone https://github.com/tatimunizz/the-gallery-page.git
-cd the-gallery
+cd the-gallery-page
 
 ### 2. Run the Application
 
@@ -56,7 +58,7 @@ All endpoints are prefixed with `/api` and return JSON.
 | GET /api/news | Returns a list of up to 5 art news articles. |
 | GET /api/images | Returns a list of up to 6 images with titles and links. |
 | GET /api/spellcheck?word={word} | Checks spelling and returns suggestions. |
-| GET /api/comment?tag={tag} | Returns a contextual random comment. |
+| GET /api/comment | Returns an AI‑generated contextual comment based on current page content. |
 
 ## Building for Production
 
@@ -71,16 +73,24 @@ java -jar target/the-gallery-*.jar
 
 The application will be available at http://localhost:8080.
 
+### Deploy with Docker
+
+A `Dockerfile` is included for containerised deployment. Build and run with:
+
+docker build -t the-gallery .
+docker run -p 8080:8080 the-gallery
+
 ## Project Structure
 
 the-gallery/
 ├── src/
 │   ├── main/
-│   │   ├── java/com/artgallery/backend/   # Java source files (Web, Controllers)
+│   │   ├── java/com/thegallery/app/     # Java source files (Web, Controllers)
 │   │   ├── resources/
-│   │   │   ├── static/                     # Frontend assets (CSS, JS, images)
-│   │   │   ├── templates/                  # Thymeleaf HTML fragments
-│   │   │   └── application.properties      # Spring Boot configuration
+│   │   │   ├── static/                  # Frontend assets (CSS, JS, images)
+│   │   │   ├── templates/               # Thymeleaf HTML fragments
+│   │   │   └── application.properties   # Spring Boot configuration
+├── Dockerfile
 ├── .gitignore
 ├── pom.xml
 └── README.md
